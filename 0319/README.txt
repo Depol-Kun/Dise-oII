@@ -1,5 +1,5 @@
 Lógica de Conexión (lib/conex.php)
-Primeramente creamos una carpeta nombrada lib y en ella el archivo conex.php donde se realiza lo 
+Primeramente creamos una carpeta nombrada lib y en ella el archivo conexion.php donde se realiza lo 
 siguiente:
 Se establece una clase final con el fin de que esta no sea heredada ni reutilizada además de ese sector, 
 el private indica que esas variables no serán modificadas fuera de esa clase a excepción de la variable 
@@ -8,12 +8,12 @@ entre PHP y MySQL, con el elemento $this le estamos ordenando enviar los datos d
 mysqli, por último hacemos una comprobación de que esta conexión está funcionando y que no fue 
 corrompida.
 
-Lógica del Índice (index.php)
+Lógica del Índice (eventos.php)
 Antes de mostrar los datos, utilizamos la propiedad num_rows para realizar un conteo de la cantidad de 
 filas que devolvió la base de datos; esto es fundamental para verificar si existen eventos registrados 
 o si la tabla está vacía.
-El siguiente paso es la creación de un archivo index donde importaremos la conexión con el archivo 
-conex.php, luego de ello atraemos la función de la clase en una variable nombrada "db", 
+El siguiente paso es la creación de un archivo eventos.php donde importaremos la conexión con el archivo 
+conexion.php, luego de ello atraemos la función de la clase en una variable nombrada "db", 
 como paso siguiente, estableceremos un enlace llamando al método conectar a través de la variable "db".
 Por consiguiente creamos una variable donde recibiremos el objeto que será almacenada en "rs", utilizando 
 la sentencia "SELECT * FROM eventos"; esto permite atraer todos los títulos y 
