@@ -1,0 +1,263 @@
+================================================================================
+EXPLICACIÓN SIMPLE DEL CÓDIGO PHP - SISTEMA DE EVENTOS
+================================================================================
+
+Este archivo está pensado para ayudarte a entender el proyecto paso por paso.
+La idea es que puedas leerlo aunque todavía seas principiante.
+
+================================================================================
+1. QUÉ HACE ESTE SISTEMA
+================================================================================
+
+Tu sistema de eventos hace 4 cosas básicas:
+- mostrar eventos
+- crear eventos
+- editar eventos
+- borrar eventos
+
+Eso se llama CRUD:
+- Create = crear
+- Read = leer
+- Update = actualizar
+- Delete = borrar
+
+================================================================================
+2. ARCHIVO `lib/evento.php`
+================================================================================
+
+Este archivo contiene la clase `Evento`.
+
+Una clase es como una plantilla.
+Con esa plantilla puedes crear objetos que saben trabajar con la tabla de eventos.
+
+Ejemplo simple:
+- la clase define lo que se puede hacer
+- el objeto es el que realmente hace el trabajo
+
+--------------------------------------------------------------------------------
+Qué significa cada parte
+--------------------------------------------------------------------------------
+
+`class Evento`
+- crea una clase llamada Evento
+
+`private $db`
+- guarda la conexión a la base de datos
+- es `private` porque solo se usa dentro de la clase
+
+`__construct($con)`
+- es el constructor
+- se ejecuta cuando creas el objeto con `new Evento($con)`
+- aquí se guarda la conexión en `$this->db`
+
+`$this->db = $con`
+- `$this` significa "este mismo objeto"
+- `->` sirve para acceder a una propiedad o método de un objeto
+
+--------------------------------------------------------------------------------
+Métodos principales
+--------------------------------------------------------------------------------
+
+`getALL()`
+- trae todos los eventos
+- usa esta consulta:
+  `SELECT * FROM eventos`
+
+`getByID($id)`
+- busca un evento por su id
+- se usa cuando quieres editar un evento específico
+
+`delete($id)`
+- borra un evento por su id
+
+`insert($datos)`
+- inserta un nuevo evento
+- recibe los datos del formulario
+
+`update($datos)`
+- actualiza un evento existente
+- usa el id para saber cuál registro modificar
+
+--------------------------------------------------------------------------------
+Importante para principiantes
+--------------------------------------------------------------------------------
+
+En este archivo ves muchas veces esto:
+- `$sql`
+- `$rs`
+- `$datos`
+- `$id`
+
+Eso no son palabras especiales.
+Solo son nombres de variables.
+
+También ves puntos `.` para unir textos:
+- "Hola " . "mundo" = "Hola mundo"
+
+================================================================================
+3. ARCHIVOS DE LA CARPETA `eventos/`
+================================================================================
+
+--------------------------------------------------------------------------------
+`index.php`
+--------------------------------------------------------------------------------
+
+Qué hace:
+- muestra la lista de todos los eventos
+
+Paso a paso:
+1. incluye los archivos de conexión y de la clase Evento
+2. crea la conexión
+3. crea el objeto Evento
+4. llama a `getALL()`
+5. muestra los datos en una tabla
+
+Palabras clave:
+- `include` = trae otro archivo PHP
+- `new` = crea un objeto
+- `while` = repite mientras haya filas
+
+--------------------------------------------------------------------------------
+`nuevo.php`
+--------------------------------------------------------------------------------
+
+Qué hace:
+- muestra un formulario vacío para crear un evento
+
+Como es solo HTML, casi no tiene PHP.
+
+La idea es simple:
+- el usuario escribe los datos
+- el formulario envía la información a `guardar.php`
+
+--------------------------------------------------------------------------------
+`guardar.php`
+--------------------------------------------------------------------------------
+
+Qué hace:
+- recibe los datos del formulario
+- los guarda en la base de datos
+
+Paso a paso:
+1. recibe los datos con `$_POST`
+2. verifica que sí hayan llegado datos
+3. llama a `insert($_POST)`
+4. muestra un mensaje de éxito o error
+
+Palabras clave:
+- `$_POST` = datos enviados por formulario
+- `isset()` = comprueba si existe algo
+- `!empty()` = comprueba que no esté vacío
+- `echo` = muestra texto en pantalla
+
+--------------------------------------------------------------------------------
+`editar.php`
+--------------------------------------------------------------------------------
+
+Qué hace:
+- busca un evento por id
+- muestra un formulario con los datos ya llenos
+
+Paso a paso:
+1. recibe el id desde la URL
+2. busca el evento con `getByID()`
+3. usa `fetch_assoc()` para convertir el resultado en un array
+4. muestra el formulario con valores prellenados
+
+Palabras clave:
+- `$_GET` = datos que llegan por la URL
+- `null` = significa “sin valor”
+- `hidden` = campo oculto del formulario
+
+--------------------------------------------------------------------------------
+`borrar.php`
+--------------------------------------------------------------------------------
+
+Qué hace:
+- elimina un evento por su id
+
+Paso a paso:
+1. recibe el id por la URL
+2. verifica que exista
+3. llama a `delete()`
+4. si funciona, regresa al listado
+
+Palabras clave:
+- `header("Location: ...")` = redirige a otra página
+
+================================================================================
+4. CÓMO SE CONECTA TODO
+================================================================================
+
+La idea del sistema es esta:
+
+- `index.php` muestra la lista
+- `nuevo.php` muestra el formulario para crear
+- `guardar.php` guarda lo nuevo
+- `editar.php` muestra el formulario para editar
+- `Actualizar.php` actualizaría los datos
+- `borrar.php` elimina un registro
+
+Eso es el flujo completo del CRUD.
+
+================================================================================
+5. DIAGRAMA MENTAL SIMPLE
+================================================================================
+
+1. entras a `index.php`
+2. ves la lista de eventos
+3. haces clic en nuevo, editar o borrar
+4. el archivo correspondiente procesa la acción
+5. vuelves al listado
+
+================================================================================
+6. EXPLICACIÓN DE PALABRAS IMPORTANTES
+================================================================================
+
+`class`
+- define una clase
+
+`public`
+- permite usar un método desde afuera de la clase
+
+`private`
+- solo se usa dentro de la clase
+
+`function`
+- define una función o método
+
+`return`
+- devuelve un resultado
+
+`->`
+- sirve para acceder a propiedades y métodos de un objeto
+
+`$this`
+- representa el objeto actual
+
+================================================================================
+7. OJO CON ALGO IMPORTANTE
+================================================================================
+
+En tu código actual, los datos se están pegando directamente en el SQL.
+Eso funciona, pero no es lo más seguro.
+
+Lo ideal después es aprender consultas preparadas para evitar problemas como:
+- SQL Injection
+
+No te preocupes si todavía no entiendes eso.
+Solo quédate con la idea de que más adelante se puede mejorar.
+
+================================================================================
+8. RESUMEN MUY CORTO
+================================================================================
+
+Si lo ves simple, tu sistema hace esto:
+- conecta a la base de datos
+- trae eventos
+- crea eventos
+- edita eventos
+- borra eventos
+
+La clase `Evento` es la que organiza las consultas a la base de datos.
+Los archivos de la carpeta `eventos/` usan esa clase para mostrar pantallas y procesar formularios.

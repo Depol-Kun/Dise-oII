@@ -96,7 +96,6 @@ a:hover{
 }
 
 </style>
-
 </head>
 
 <body>

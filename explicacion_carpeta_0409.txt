@@ -1,0 +1,559 @@
+EXPLICACION COMPLETA Y DETALLADA DE LA CARPETA 0409
+===================================================
+
+1) VISION GENERAL
+-----------------
+La carpeta /var/www/html/0409 contiene una aplicacion web desarrollada en PHP con una
+estructura modular basica. Su objetivo principal es:
+
+- Mostrar paginas informativas (Inicio, Acerca de, Contacto).
+- Gestionar usuarios mediante operaciones CRUD (crear, listar, editar, borrar).
+- Mostrar eventos obtenidos desde base de datos y calcular su estado en tiempo real.
+- Reutilizar una plantilla visual comun (header, menu lateral, footer, etc.).
+
+El proyecto usa:
+
+- PHP procedural + clases simples para acceso a datos.
+- MariaDB/MySQL mediante mysqli.
+- Bootstrap y Bootstrap Icons para estilos.
+
+
+2) ESTRUCTURA DE CARPETAS Y ARCHIVOS
+------------------------------------
+Ruta base analizada:
+
+/var/www/html/0409
+
+Contenido principal:
+
+- index.php
+- acercade.php
+- contactos.php
+- eventos/
+  - index.php
+- lib/
+  - conexion.php
+  - usuario.php
+  - evento.php
+- parciales/
+  - head.php
+  - header.php
+  - aside1.php
+  - aside2.php
+  - footer.php
+  - templateStart.php
+  - templateEnd.php
+- usuario/
+  - index.php
+  - nuevo.php
+  - editar.php
+  - guardar.php
+  - actualizar.php
+  - borrar.php
+  - _form.php
+
+
+3) FLUJO DE PLANTILLA (PARCIALES)
+---------------------------------
+La app utiliza una estructura de plantilla para no repetir HTML en cada pagina.
+
+3.1 templateStart.php
+- Incluye header.php y head.php.
+- Abre el body y el contenedor principal.
+- Inserta el menu lateral izquierdo (aside1.php).
+- Abre la columna central <main> donde se inyecta el contenido especifico de cada pagina.
+
+3.2 templateEnd.php
+- Cierra <main>.
+- Inserta la columna lateral derecha (aside2.php).
+- Cierra filas y contenedores.
+- Carga bootstrap.bundle.min.js.
+- Incluye el footer.php.
+- Cierra </body> y </html>.
+
+3.3 head.php
+- Define DOCTYPE, idioma, meta charset y viewport.
+- Carga CSS de Bootstrap y Bootstrap Icons.
+- Incluye estilos para tablas tipo CRUD.
+
+3.4 header.php
+- Barra de navegacion superior con enlaces a:
+  - /0409/index.php
+  - /0409/acercade.php
+  - /0409/contactos.php
+
+3.5 aside1.php
+- Menu lateral izquierdo con accesos:
+  - Inicio
+  - Eventos
+  - Usuarios
+  - Cerrar sesion (placeholder "#")
+
+3.6 aside2.php
+- Panel lateral derecho con accesos de ejemplo:
+  - Notificaciones
+  - Mensajes
+  - Salir
+
+3.7 footer.php
+- Pie de pagina oscuro con texto de copyright.
+
+
+4) PAGINAS GENERALES
+--------------------
+4.1 /0409/index.php
+- Incluye templateStart y templateEnd.
+- Muestra titulo de bienvenida.
+
+4.2 /0409/acercade.php
+- Muestra seccion "Nosotros" con descripcion institucional.
+
+4.3 /0409/contactos.php
+- Presenta formulario de contacto con campos:
+  - nombre
+  - email
+  - mensaje
+- Actualmente esta planteado como vista simple (sin logica de persistencia).
+
+
+5) MODULO DE BASE DE DATOS
+--------------------------
+5.1 /0409/lib/conexion.php
+
+Clase: Conex
+Tipo: final class
+
+Responsabilidad:
+- Centralizar la conexion a base de datos.
+
+Parametros internos:
+- host = "mariadb"
+- usuario = "root"
+- password = "root"
+- db = "dw2_agenda"
+
+Metodo:
+- conectar(): crea un objeto mysqli y retorna la conexion.
+- Si hay error de conexion, detiene ejecucion con die("Error de conexion").
+
+Uso esperado:
+- Se instancia Conex.
+- Se llama conectar().
+- La conexion resultante se inyecta a clases modelo (Usuario, Evento).
+
+
+6) MODELO DE USUARIOS
+---------------------
+6.1 /0409/lib/usuario.php
+
+Clase: Usuario
+Propiedad:
+- private $db (conexion mysqli)
+
+Metodos:
+
+1. getALL()
+   - SQL: SELECT * FROM usuarios;
+   - Retorna todos los usuarios para listados.
+
+2. getByID($id)
+   - SQL: SELECT * FROM usuarios WHERE id = ...
+   - Convierte id a entero.
+   - Retorna un usuario especifico.
+
+3. delete($id)
+   - SQL: DELETE FROM usuarios WHERE id = ...
+   - Convierte id a entero.
+   - Elimina un registro.
+
+4. insert($datos)
+   - Inserta: nombre, apellido, fenac, doc, mail, telefono, direccion,
+     contrasena, admin.
+   - Recibe datos del formulario de alta.
+
+5. update($datos)
+   - Actualiza los mismos campos usando id del usuario.
+   - Convierte id a entero.
+
+Nota arquitectonica:
+- La clase encapsula CRUD, pero usa SQL concatenado en varios metodos.
+
+
+7) MODULO USUARIO (CRUD COMPLETO)
+---------------------------------
+7.1 /0409/usuario/index.php (LISTADO)
+- Incluye conexion + modelo Usuario.
+- Obtiene todos los usuarios con getALL().
+- Muestra:
+  - cantidad total de registros
+  - tabla con todos los campos
+  - botones Editar/Borrar
+  - boton Insertar (nuevo.php)
+- Lee query params para mensajes:
+  - ok=1 -> insertado correctamente
+  - ok=2 -> actualizado correctamente
+  - ok=3 -> eliminado correctamente
+  - error=3 -> error al eliminar
+
+7.2 /0409/usuario/nuevo.php (ALTA - VISTA)
+- Define target = "guardar.php".
+- Define titulo_form = "Agregar Nuevo Usuario".
+- Crea un arreglo $fila con valores vacios por defecto.
+- Incluye templateStart, luego _form.php, luego templateEnd.
+
+7.3 /0409/usuario/_form.php (FORMULARIO REUTILIZABLE)
+- Recibe:
+  - $titulo_form
+  - $target
+  - $fila (datos actuales o vacios)
+- Dibuja formulario con campos:
+  - nombre
+  - apellido
+  - fecha de nacimiento
+  - documento
+  - mail
+  - telefono
+  - direccion
+  - contrasena
+  - admin (si/no)
+- Muestra errores segun query param:
+  - error=1 (insert)
+  - error=2 (update)
+- Boton Guardar Usuario + enlace Volver.
+
+7.4 /0409/usuario/guardar.php (ALTA - PROCESO)
+- Carga conexion y modelo.
+- Valida POST:
+  - longitudes maximas
+  - formato de fecha YYYY-MM-DD
+  - formato email
+  - campos numericos (telefono, contrasena, doc)
+  - admin en {si,no}
+- Si hay errores:
+  - redirige a nuevo.php?error=1
+- Si no hay errores:
+  - ejecuta insert()
+  - redirige a index.php?ok=1
+- Si falla insert:
+  - redirige a nuevo.php?error=1
+
+7.5 /0409/usuario/editar.php (EDICION - VISTA)
+- Carga conexion y modelo.
+- Si recibe id por GET:
+  - busca usuario por getByID(id)
+  - recupera fila asociativa
+- Define target = "actualizar.php".
+- Define titulo_form = "Editar Usuario".
+- Renderiza _form.php con datos del usuario.
+
+7.6 /0409/usuario/actualizar.php (EDICION - PROCESO)
+- Carga conexion y modelo.
+- Ejecuta validaciones equivalentes a guardar.php.
+- Si hay errores:
+  - redirige a editar.php?id=...&error=1
+- Si update exitoso:
+  - redirige a index.php?ok=2
+- Si falla update:
+  - redirige a editar.php?id=...&error=2
+
+7.7 /0409/usuario/borrar.php (BORRADO - PROCESO)
+- Carga conexion y modelo.
+- Si recibe id:
+  - intenta delete(id)
+  - si ok -> index.php?ok=3
+  - si error -> index.php?error=3
+- Si no recibe id:
+  - imprime "ID no proporcionado." y termina.
+
+
+8) MODULO EVENTOS
+-----------------
+8.1 /0409/lib/evento.php
+
+Clase: Evento
+Metodos:
+- getALL()
+- getByID($id)
+- delete($id)
+- insert($datos)
+- update($datos)
+
+Tabla usada:
+- eventos
+
+Campos manejados:
+- titulo
+- fecha
+- hora
+- lugar
+- Estado
+
+8.2 /0409/eventos/index.php
+- Define zona horaria America/Asuncion.
+- Conecta a BD.
+- Ejecuta:
+  SELECT * FROM eventos ORDER BY fecha ASC;
+- Muestra tabla de eventos y cantidad total.
+- Calcula estado por fila con DateTime:
+  - si ahora > fecha+hora del evento -> "Finalizado" (rojo)
+  - caso contrario -> "Pendiente" (verde)
+- Incluye enlaces Editar/Borrar por id (apuntan a archivos no presentes en
+  esta carpeta de eventos).
+
+
+9) RELACION ENTRE CAPAS (RESUMEN TECNICO)
+-----------------------------------------
+Patron observado:
+
+- Vista (usuario/index, nuevo, editar, eventos/index) solicita datos.
+- Control basico en el mismo archivo PHP (valida POST, redirecciona).
+- Modelo (Usuario/Evento) ejecuta SQL.
+- Conexion (Conex) provee mysqli compartido.
+- Parciales envuelven todo en layout consistente.
+
+
+10) COMPORTAMIENTO FUNCIONAL ACTUAL
+-----------------------------------
+Lo que esta funcionando de forma directa:
+
+- Navegacion principal dentro de /0409.
+- CRUD de usuarios con mensajes de exito/error via query string.
+- Consulta y visualizacion de eventos con estado calculado.
+- Estructura visual unificada con Bootstrap.
+
+
+11) OBSERVACIONES IMPORTANTES DETECTADAS
+----------------------------------------
+1. Mezcla de rutas /0409 y /0402
+   - Algunos archivos de /0409 incluyen templateStart/templateEnd desde /0402
+     (por ejemplo, acercade.php, contactos.php, eventos/index.php).
+   - Esto puede romper coherencia visual o funcional si /0402 cambia.
+
+2. Orden HTML en templateStart.php
+   - Se incluye header.php antes de head.php.
+   - El nav (header) aparece antes de DOCTYPE/head/body, lo cual no es
+     estructuralmente correcto en HTML.
+
+3. Formulario contactos.php con detalles de marcado
+   - Hay un <h1 incompleto y clases con espacios indebidos ("mb -3").
+   - El textarea no define name para envio de datos.
+   - El form no tiene logica de almacenamiento.
+
+4. Seguridad de datos sensibles
+   - Se muestra campo contrasena en el listado de usuarios.
+   - Se almacena/gestiona como valor directo (sin hash).
+
+5. SQL concatenado
+   - Insert/update usan concatenacion de strings.
+   - Aunque hay validaciones, lo recomendable es prepared statements.
+
+6. Modulo eventos parcial
+   - evento.php documenta archivos de CRUD que no estan en /0409/eventos
+     (solo existe index.php en esa carpeta).
+
+
+12) CONCLUSION
+--------------
+La carpeta 0409 implementa una aplicacion PHP educativa/administrativa con:
+
+- Layout modular reutilizable.
+- Conexion a base de datos centralizada.
+- CRUD completo para usuarios.
+- Listado de eventos con estado dinamico por fecha/hora.
+
+Su diseno permite entender claramente la separacion basica entre vista,
+acceso a datos y estructura visual. Al mismo tiempo, presenta puntos de mejora
+importantes en consistencia de rutas, estructura HTML y seguridad de datos.
+
+
+13) ENFOQUE ESPECIAL: MODULO /0409/USUARIO (EXPLICACION VISUAL)
+---------------------------------------------------------------
+Esta seccion amplia y explica SOLO el modulo de usuarios de manera mas clara.
+
+========================================================================
+MAPA RAPIDO DEL MODULO
+========================================================================
+/0409/usuario/
+|
+|-- index.php       -> Lista usuarios + botones de accion
+|-- nuevo.php       -> Pantalla de alta (usa _form.php)
+|-- guardar.php     -> Procesa alta (valida + inserta)
+|-- editar.php      -> Pantalla de edicion (usa _form.php)
+|-- actualizar.php  -> Procesa edicion (valida + actualiza)
+|-- borrar.php      -> Procesa eliminacion por id
+|-- _form.php       -> Formulario compartido (alta y edicion)
+
+
+========================================================================
+FLUJO FUNCIONAL COMPLETO (PASO A PASO)
+========================================================================
+A) LISTAR
+1. Usuario entra a /0409/usuario/index.php
+2. Se crea conexion (Conex) y modelo (Usuario)
+3. Se ejecuta Usuario->getALL()
+4. Se dibuja tabla con todos los usuarios
+5. Se muestran acciones: Insertar, Editar, Borrar
+
+B) CREAR
+1. Click en "Insertar" -> nuevo.php
+2. nuevo.php prepara datos vacios y target=guardar.php
+3. _form.php muestra formulario
+4. Submit -> guardar.php
+5. guardar.php valida:
+   - requeridos
+   - formato fecha
+   - formato mail
+   - numericos
+   - admin si/no
+6. Si ok -> insert() -> redireccion a index.php?ok=1
+7. Si error -> redireccion a nuevo.php?error=1
+
+C) EDITAR
+1. Click en "Editar" -> editar.php?id=XX
+2. editar.php obtiene datos con getByID(id)
+3. _form.php se carga con valores actuales
+4. Submit -> actualizar.php
+5. actualizar.php valida igual que guardar.php
+6. Si ok -> update() -> index.php?ok=2
+7. Si error -> editar.php?id=XX&error=1 o error=2
+
+D) ELIMINAR
+1. Click en "Borrar" (con confirmacion JS)
+2. borrar.php recibe id por GET
+3. Ejecuta delete(id)
+4. Si ok -> index.php?ok=3
+5. Si falla -> index.php?error=3
+
+
+========================================================================
+QUE HACE CADA ARCHIVO (DETALLE PRACTICO)
+========================================================================
+1) index.php
+- Es la vista principal del CRUD.
+- Tiene la tabla de usuarios y botones de accion.
+- Muestra mensajes de estado segun query string:
+  ok=1, ok=2, ok=3, error=3.
+- Campo a notar: tambien imprime contrasena en la tabla.
+
+2) nuevo.php
+- No inserta nada directamente.
+- Solo prepara:
+  - titulo_form = "Agregar Nuevo Usuario"
+  - target = "guardar.php"
+  - fila vacia por defecto
+- Reusa _form.php para no duplicar HTML.
+
+3) editar.php
+- No actualiza directamente.
+- Solo prepara:
+  - carga de datos del usuario por id
+  - titulo_form = "Editar Usuario"
+  - target = "actualizar.php"
+- Reusa _form.php igual que nuevo.php.
+
+4) _form.php
+- Es la pieza central de interfaz.
+- Recibe variables externas y arma un solo formulario reutilizable.
+- Campos:
+  nombre, apellido, fenac, doc, mail, telefono, direccion, contrasena, admin.
+- Beneficio: evita duplicar formulario en nuevo/editar.
+
+5) guardar.php
+- Procesa el POST de alta.
+- Hace validaciones de negocio/estructura antes de insert().
+- Redirecciona siempre (patron Post/Redirect/Get).
+
+6) actualizar.php
+- Procesa el POST de edicion.
+- Mantiene las mismas reglas de validacion que guardar.php.
+- Redirecciona al listado o vuelve al formulario con error.
+
+7) borrar.php
+- Elimina por id recibido en GET.
+- Responde con redireccion y codigos de estado en query string.
+
+
+========================================================================
+VARIABLES CLAVE DEL MODULO
+========================================================================
+- $target
+  Define a que archivo se envia el formulario (_form.php lo usa en action).
+
+- $titulo_form
+  Permite que el mismo _form.php muestre "Agregar" o "Editar".
+
+- $fila
+  Arreglo con valores del usuario:
+  - vacio en nuevo.php
+  - cargado desde BD en editar.php
+
+- $_GET['ok'] / $_GET['error']
+  Controlan mensajes visuales en index.php y _form.php.
+
+
+========================================================================
+RELACION CON EL MODELO /0409/lib/usuario.php
+========================================================================
+El modulo /usuario NO ejecuta SQL directamente (salvo validaciones/logica de flujo).
+La capa de datos se delega al modelo Usuario:
+
+- getALL()   <- index.php
+- getByID()  <- editar.php
+- insert()   <- guardar.php
+- update()   <- actualizar.php
+- delete()   <- borrar.php
+
+Esto mantiene una separacion simple:
+- Archivos en /usuario: flujo web + validacion + redireccion
+- Archivo en /lib/usuario.php: consultas SQL
+
+
+========================================================================
+VALIDACIONES IMPLEMENTADAS (EN GUARDAR Y ACTUALIZAR)
+========================================================================
+Se controla:
+- nombre: obligatorio, max 100
+- apellido: obligatorio, max 100
+- fenac: obligatorio, formato YYYY-MM-DD
+- doc: obligatorio, max 191, numerico
+- mail: obligatorio, max 40, formato email valido
+- telefono: obligatorio, numerico
+- direccion: obligatorio, max 100
+- contrasena: obligatoria, numerica
+- admin: obligatorio, valor en {si,no}
+
+Si una validacion falla:
+- No se inserta/actualiza.
+- Se redirige con codigo de error.
+
+
+========================================================================
+RIESGOS Y MEJORAS IMPORTANTES SOLO DEL MODULO USUARIO
+========================================================================
+1. Seguridad de contrasena
+   - Actualmente se guarda y se muestra sin hash.
+   - Mejora recomendada: hash con password_hash() y no mostrar en listado.
+
+2. SQL concatenado
+   - insert/update usan concatenacion de cadenas.
+   - Mejora recomendada: prepared statements para evitar inyeccion SQL.
+
+3. Mensajes de error
+   - Hoy se comunica por ?error=... generico.
+   - Mejora recomendada: mostrar errores puntuales por campo en formulario.
+
+4. Tipos de input
+   - contrasena aparece como numerica.
+   - Mejora recomendada: usar type="password" y politica de complejidad.
+
+
+========================================================================
+RESUMEN CORTO DEL MODULO /USUARIO
+========================================================================
+El modulo /0409/usuario esta correctamente organizado para un CRUD clasico:
+- Lista, crea, edita y borra.
+- Reutiliza formulario (_form.php) de forma limpia.
+- Tiene validaciones de entrada y redireccion controlada.
+
+Su principal deuda tecnica esta en seguridad (contrasena y SQL concatenado),
+mas que en estructura de flujo, que actualmente es clara y funcional.

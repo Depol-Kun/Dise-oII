@@ -2,14 +2,17 @@
   "name": "PHP 8.1 Apache + MariaDB + phpMyAdmin",
   "dockerComposeFile": "docker-compose.yml",
   "service": "php-apache",
-  "workspaceFolder": "/var/www/html",   // <- raíz del proyecto
-  "settings": {
-    "php.validate.executablePath": "/usr/local/bin/php"
-  },
-  "extensions": [
-    "felixfbecker.php-debug",
-    "bmewburn.vscode-intelephense-client",
-    "mehedidracula.php-namespace-resolver"
-  ],
-  // "postCreateCommand": "composer install"
+  "workspaceFolder": "/var/www/html",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "php.validate.executablePath": "/usr/local/bin/php"
+      },
+      "extensions": [
+        "felixfbecker.php-debug",
+        "bmewburn.vscode-intelephense-client",
+        "mehedidracula.php-namespace-resolver"
+      ]
+    }
+  }
 }
