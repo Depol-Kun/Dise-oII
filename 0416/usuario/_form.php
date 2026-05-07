@@ -39,7 +39,7 @@
         </p>
         <p>
             <label for="contrasena">Contrasena:</label><br>
-            <input type="nomber" id="contrasena" name="contrasena" value="<?php echo $fila['contrasena']; ?>" required>
+            <input type="number" id="contrasena" name="contrasena" value="<?php echo $fila['contrasena']; ?>" required>
         </p>
         <p>
             <label for="admin">Admin:</label><br>

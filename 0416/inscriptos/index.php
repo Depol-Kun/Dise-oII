@@ -9,7 +9,7 @@ $inscripcion = new inscripciones($con);
 $eventos = new Evento($con);
 $evento = ['titulo' => 'Sin evento seleccionado', 'fecha' => '', 'lugar' => ''];
 $ev_id = 0;
-$rs = $inscripcion->getALL();
+$rs = $inscripcion->getByEventoID('id');
 
 if (isset($_GET['id']) || isset($_GET['evento_id'])) {
     $ev_id = isset($_GET['id']) ? (int)$_GET['id'] : (int)$_GET['evento_id'];
